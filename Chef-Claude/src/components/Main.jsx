@@ -1,15 +1,27 @@
-import React, { useState } from "react"
+import React from "react"
 import IngredientsList from "./IngredientsList"
 import ClaudeRecipe from "./ClaudeRecipe"
+import {getRecipeFromMistral } from "../ai"
 
 export default function Main() {
 
-  const [ingredients, setIngredients] = React.useState([])
-  const [recipeShown, setRecipeShown] = React.useState(false)
+  const [ingredients, setIngredients] = React.useState(["all the main spices", "pasta", "ground beef", "tomato paste"])
+  const [recipe, setRecipe] = React.useState(false)
+  const recipeSection = React.useRef(null)
 
-  function toggleRecipeShown() {
-    setRecipeShown(prevRecipeShown => !prevRecipeShown)
+  React.useEffect(() => {
+    if(recipe !=="" && recipeSection.current !== null) {
+      recipeSection.current.scrollIntoView({behavior: "smooth"})
+    }
+  }, [recipe])
+
+  async function getRecipe() {
+    // const recipeMarkdown = await getRecipeFromMistral(ingredients)
+    // console.log(recipeMarkdown)
+    setRecipe(prevRecipe => !prevRecipe)
   }
+
+  // const recipeAPIkey = import.meta.env.VITE_API_KEY;
 
   function addIngredient(event) {
     event.preventDefault()
@@ -29,11 +41,15 @@ export default function Main() {
         />
         <button type="submit">Add ingredient</button>
       </form>
-      {ingredients.length > 0 && <IngredientsList 
-        ingredients={ingredients} 
-        toggleRecipeShown={toggleRecipeShown}/>}
+      {ingredients.length > 0 && 
+        <IngredientsList 
+          ingredients={ingredients} 
+          getRecipe={getRecipe}
+          recipeRef={recipeSection}
+        />
+      }
 
-      {recipeShown && <ClaudeRecipe />}
+      {recipe && <ClaudeRecipe />}
     </main>
   )
 }
